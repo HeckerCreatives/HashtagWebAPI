@@ -1,6 +1,7 @@
 const { default: mongoose } = require("mongoose")
 const Miner = require("../models/Miner")
 const Inventoryhistory = require("../models/Inventoryhistory")
+const Skip = require("../models/Skip")
 
 
 exports.getMiner = async(req, res)=> {
@@ -35,18 +36,18 @@ exports.getUserMiner = async(req, res)=> {
     const { type } = req.query
 
     let value = true
-    if (type == "swift_lane"){
-        const tempminer = await Inventoryhistory.findOne({owner: new mongoose.Types.ObjectId(id), minertype: "quick_miner", type: "Buy Quick Miner"})
+    if (type == "mega_hash"){
+        const tempminer = await Inventoryhistory.findOne({owner: new mongoose.Types.ObjectId(id), minertype: "micro_hash", type: "Buy Micro Hash"})
         .then(data => data)
         if(!tempminer){
             value = false
         }
     }
 
-    else if (type == "rapid_lane"){
-        const tempminer = await Inventoryhistory.findOne({owner: new mongoose.Types.ObjectId(id), minertype: "swift_lane", type: "Buy Switf Lane"})
+    else if (type == "giga_hash"){
+        const tempminer = await Inventoryhistory.findOne({owner: new mongoose.Types.ObjectId(id), minertype: "giga_hash", type: "Buy Giga Hash"})
         .then(data => data)
-        const tempminer1 = await Inventoryhistory.findOne({owner: new mongoose.Types.ObjectId(id), minertype: "quick_miner", type: "Buy Quick Miner"})
+        const tempminer1 = await Inventoryhistory.findOne({owner: new mongoose.Types.ObjectId(id), minertype: "micro_hash", type: "Buy Micro Hash"})
         .then(data => data)
 
         if(!tempminer || !tempminer1){
@@ -54,19 +55,16 @@ exports.getUserMiner = async(req, res)=> {
         }
 
     } 
-    else if (type == "flash_miner"){
 
-        const tempminer = await Inventoryhistory.findOne({owner: new mongoose.Types.ObjectId(id), minertype: "swift_lane", type: "Buy Switf Lane"})
-        .then(data => data)
-        const tempminer1 = await Inventoryhistory.findOne({owner: new mongoose.Types.ObjectId(id), minertype: "quick_miner", type: "Buy Quick Miner"})
-        .then(data => data)
-        const tempminer2 = await Inventoryhistory.findOne({owner: new mongoose.Types.ObjectId(id), minertype: "rapid_lane", type: "Buy Rapid Lane"})
-        .then(data => data)
+    const isskip = await Skip.findOne({owner: new mongoose.Types.ObjectId(id)})
+    .then(data => data)
+    .catch(err => {
+        console.log(`There's a problem fetching skip. Error: ${err}`)
+        return res.status(400).json({ message: "bad-request", data: "There's a problem with the server. Please contact customer support for more details."})
+    })
 
-        if(!tempminer || !tempminer1 || !tempminer2){
-            value = false
-        }
-        
+    if(isskip !== null){
+        value = true
     }
 
     return res.status(200).json({ message: "success", data: value})
