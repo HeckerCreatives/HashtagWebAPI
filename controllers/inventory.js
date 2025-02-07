@@ -377,7 +377,7 @@ exports.getclaimhistory = async (req, res) => {
         limit: parseInt(limit) || 10
     }
 
-    const history = await Inventoryhistory.find({owner: new mongoose.Types.ObjectId(id), $or: [{type: "Claim Quick Miner"}, {type: "Claim Switf Lane"}, {type: "Claim Rapid Lane"}]})
+    const history = await Inventoryhistory.find({ owner: new mongoose.Types.ObjectId(id), type: { $regex: /^Claim/ }})    
     .skip(pageOptions.page * pageOptions.limit)
     .limit(pageOptions.limit)
     .sort({'createdAt': -1})
@@ -395,7 +395,7 @@ exports.getclaimhistory = async (req, res) => {
         }})
     }
 
-    const totalPages = await Inventoryhistory.countDocuments({owner: new mongoose.Types.ObjectId(id), $or: [{type: "Buy Quick Miner"}, {type: "Claim Switf Lane"}, {type: "Buy Rapid Lane"}]})
+    const totalPages = await Inventoryhistory.countDocuments({owner: new mongoose.Types.ObjectId(id), type: { $regex: /^Claim/ }})
     .then(data => data)
     .catch(err => {
 
@@ -435,7 +435,7 @@ exports.gettotalpurchased = async (req, res) => {
         { 
             $match: { 
                 owner: new mongoose.Types.ObjectId(id), 
-                $or: [{type: "Buy Quick Miner"}, {type: "Buy Swift Lane"}, {type: "Buy Rapid Lane"}]
+                type: { $regex: /^Claim/ }            
             } 
         },
         { 
