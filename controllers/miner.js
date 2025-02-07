@@ -36,7 +36,11 @@ exports.getUserMiner = async(req, res)=> {
     const { type } = req.query
 
     let value = true
-    if (type == "mega_hash"){
+
+    if(type == 'micro_hash'){
+        value = true
+    }
+    else if (type == "mega_hash"){
         const tempminer = await Inventoryhistory.findOne({owner: new mongoose.Types.ObjectId(id), minertype: "micro_hash", type: "Buy Micro Hash"})
         .then(data => data)
         if(!tempminer){
