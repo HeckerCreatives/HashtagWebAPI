@@ -508,7 +508,7 @@ exports.getproductgraph = async (req, res) => {
         const hourlyCounts = await Analytics.aggregate([
             {
                 $match: {
-                    $or: [{type: "Buy Quick Miner"}, {type: "Buy Swift Lane"}, {type: "Buy Rapid Lane"}],
+                    type: { $regex: /^Claim/ },                    
                     createdAt: {
                         $gte: startOfDay,
                         $lt: endOfDay
@@ -552,7 +552,7 @@ exports.getproductgraph = async (req, res) => {
         const weeklyCounts = await Analytics.aggregate([
             {
                 $match: {
-                    $or: [{type: "Buy Quick Miner"}, {type: "Buy Swift Lane"}, {type: "Buy Rapid Lane"}],
+                    type: { $regex: /^Claim/ },                    
                     createdAt: {
                         $gte: startOfWeek,
                         $lt: endOfWeek
@@ -593,7 +593,7 @@ exports.getproductgraph = async (req, res) => {
         const monthlyCounts = await Analytics.aggregate([
             {
                 $match: {
-                    $or: [{type: "Buy Quick Miner"}, {type: "Buy Swift Lane"}, {type: "Buy Rapid Lane"}],
+                    type: { $regex: /^Claim/ },                    
                     createdAt: {
                         $gte: startOfYear,
                         $lt: endOfYear
@@ -637,7 +637,7 @@ exports.getproductgraph = async (req, res) => {
         const yearlyCounts = await Analytics.aggregate([
             {
                 $match: {
-                    $or: [{type: "Buy Quick Miner"}, {type: "Buy Swift Lane"}, {type: "Buy Rapid Lane"}]
+                    type: { $regex: /^Claim/ }                
                 }
             },
             {
@@ -1022,7 +1022,7 @@ exports.getunilevelpayoutgraph = async (req, res) => {
 exports.getreferrallinkstatus = async (req, res) => {
     const {id, username} = req.user
 
-    const referrallink = await Analytics.find({owner: new mongoose.Types.ObjectId(id), $or: [{type: "Buy Quick Miner"}, {type: "Buy Switf Lane"}, {type: "Buy Rapid Lane"}, {type: "Buy Flash Miner"}]})
+    const referrallink = await Analytics.find({owner: new mongoose.Types.ObjectId(id), type: { $regex: /^Claim/ }})
     .then(data => data)
     .catch(err => {
         console.log(`There's a problem getting the referral link status for ${username}. Error: ${err}`)

@@ -27,7 +27,7 @@ exports.buyminer = async (req, res) => {
     })
 
     if (totalminer.length >= 2){
-        return res.status(400).json({message: "failed", data: `You can only have a max of 2 active ${(type == "quick_miner" ? "Quick" : type == "swift_lane" ? "Swift Lane" : "Rapid Lane")} miners. Please complete either of the two to buy again.`})
+        return res.status(400).json({message: "failed", data: `You can only have a max of 2 active ${(type == "micro_hash" ? "Micro" : type == "mega_hash" ? "Mega Hash" : "Giga Hash")} miners. Please complete either of the two to buy again.`})
     }
 
     const wallet = await walletbalance("creditwallet", id)
@@ -94,30 +94,7 @@ exports.buyminer = async (req, res) => {
             })
         }
     } 
-    else if (type == "flash_miner"){
-        
-        const tempminer = await Inventoryhistory.findOne({owner: new mongoose.Types.ObjectId(id), minertype: "swift_lane", type: "Buy Switf Lane"})
-        .then(data => data)
-        const tempminer1 = await Inventoryhistory.findOne({owner: new mongoose.Types.ObjectId(id), minertype: "quick_miner", type: "Buy Quick Miner"})
-        .then(data => data)
-        const tempminer2 = await Inventoryhistory.findOne({owner: new mongoose.Types.ObjectId(id), minertype: "rapid_lane", type: "Buy Rapid Lane"})
-        .then(data => data)
-        
-        if(!tempminer || !tempminer1 || !tempminer2){
-            adjustedProfit = 0.5
-        }
-        if(skip === false){
-            
-            adjustedProfit = 0.5
-            
-            await Skip.create({ owner: new mongoose.Types.ObjectId(id), skip: "skip" })
-            .catch(err => {
-                console.log(`There's a problem creating the skip data of ${id}. Error: ${err}`)
-                return res.status(400).json({message: "bad-request", data: "There's a problem with the server! Please contact customer support."})
-            })
-        }
-        
-    }
+
     
     if(skip === true){
         
@@ -339,7 +316,7 @@ exports.getbuyhistory = async (req, res) => {
         }})
     }
 
-    const totalPages = await Inventoryhistory.countDocuments({owner: new mongoose.Types.ObjectId(id), $or: [{type: "Buy Quick Miner"}, {type: "Buy Swift Lane"}, {type: "Buy Rapid Lane"}]})
+    const totalPages = await Inventoryhistory.countDocuments({owner: new mongoose.Types.ObjectId(id), type: { $regex: /^Claim/ }})
     .then(data => data)
     .catch(err => {
 
