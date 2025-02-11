@@ -1022,7 +1022,7 @@ exports.getunilevelpayoutgraph = async (req, res) => {
 exports.getreferrallinkstatus = async (req, res) => {
     const {id, username} = req.user
 
-    const referrallink = await Analytics.find({owner: new mongoose.Types.ObjectId(id), type: { $regex: /^Claim/ }})
+    const referrallink = await Analytics.find({owner: new mongoose.Types.ObjectId(id), type: { $regex: /^Buy/ }})
     .then(data => data)
     .catch(err => {
         console.log(`There's a problem getting the referral link status for ${username}. Error: ${err}`)
@@ -1030,7 +1030,7 @@ exports.getreferrallinkstatus = async (req, res) => {
         return res.status(400).json({message: "bad-request", data: "There's a probelm getting the referral link status. Please contact customer support for more details"})
     })
 
-    if (username == "minergod"){
+    if (username == "hashbot"){
         return res.json({message: "success", data: {
             status: true
         }})
