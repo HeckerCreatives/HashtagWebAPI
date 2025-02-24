@@ -10,6 +10,7 @@ const routers = app => {
     app.use("/miner", require("./miner"))    
     app.use("/payout", require("./payout"))
     app.use("/analytics", require("./analytics"))
+    app.use("/sociallinks", require("./sociallinks"))
     app.use("/staffusers", require("./staffusers"))
     app.use("/payin", require("./payin"))
     app.use("/pricepool", require("./pricepool"))
