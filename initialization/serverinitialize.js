@@ -6,6 +6,7 @@ const Userdetails = require("../models/Userdetails")
 const Maintenance = require("../models/Maintenance")
 const Miner = require("../models/Miner")
 const Pricepool = require("../models/Pricepool")
+const Sociallinks = require("../models/Sociallinks")
 
 exports.initialize = async (req, res) => {
 
@@ -124,6 +125,29 @@ exports.initialize = async (req, res) => {
             console.log(`There's a problem creating creature data ${err}`)
             return
         })
+    }
+
+    const sociallinks = await Sociallinks.find()
+    .then(data => data)
+    .catch(err => {
+        console.log(`Error finding Social Links data: ${err}`)
+    })
+
+
+    if(sociallinks.length <= 0){
+        const socialinksdata = ["facebook", "discord", "telegram", "tiktok"]
+
+        const socialinksbulkwrite = socialinksdata.map(titles => ({
+            insertOne: {
+                document: { title: titles, link: ""}
+            }
+        }))
+
+        await Sociallinks.bulkWrite(socialinksbulkwrite)
+        .catch(err => {
+            console.log(`Error creating social links data: ${err}`)
+            return
+        }) 
     }
 
 
