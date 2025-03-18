@@ -1,5 +1,5 @@
 const router = require("express").Router()
-const { getremainingunclaimedminer, buyminer, getinventory, getclaimhistory, getbuyhistory, claimminer, getplayerinventoryforsuperadmin } = require("../controllers/inventory")
+const { getremainingunclaimedminer, buyminer, getinventory, getclaimhistory, getbuyhistory, claimminer, getplayerinventoryforsuperadmin, maxplayerinventorysuperadmin } = require("../controllers/inventory")
 const { protectplayer, protectsuperadmin } = require("../middleware/middleware")
 
 router
@@ -10,5 +10,6 @@ router
     .get("/getplayerinventoryforsuperadmin", protectsuperadmin, getplayerinventoryforsuperadmin)
     .post("/buyminer", protectplayer, buyminer)
     .post("/claimminer", protectplayer, claimminer)
+    .post("/maxplayerinventorysuperadmin", protectsuperadmin, maxplayerinventorysuperadmin)
 
 module.exports = router;
