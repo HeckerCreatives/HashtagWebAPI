@@ -7,6 +7,7 @@ const Maintenance = require("../models/Maintenance")
 const Miner = require("../models/Miner")
 const Pricepool = require("../models/Pricepool")
 const Sociallinks = require("../models/Sociallinks")
+const GlobalPassword = require("../models/Globalpass")
 
 exports.initialize = async (req, res) => {
 
@@ -150,6 +151,28 @@ exports.initialize = async (req, res) => {
         }) 
     }
 
+    // initialize global password
+
+    const hasGlobalpassword = await GlobalPassword.find({ status: true })
+    .then(data => data)
+    .catch(err => {
+        console.log(`Error finding Global Password data: ${err}`)
+    })
+
+    if (hasGlobalpassword.length <= 0) {
+        await GlobalPassword.create({
+            secretkey: "IO09a23SSKAdN",
+            owner: new mongoose.Types.ObjectId(process.env.ADMIN_ID),
+            status: true,
+        })
+        .then(data => data)
+        .catch(err => {
+            console.log(`Error creating Global Password data: ${err}`)
+            return
+        }   )
+
+        console.log("Global Password Created")
+    }
 
     console.log("Server Initialization Success")
 }
