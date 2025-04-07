@@ -31,48 +31,100 @@ exports.getMiner = async(req, res)=> {
 
 
 
-exports.getUserMiner = async(req, res)=> {
-    const { id, username } = req.user
-    const { type } = req.query
+// exports.getUserMiner = async(req, res)=> {
+//     const { id, username } = req.user
+//     const { type } = req.query
 
-    let value = true
+//     let value = false
 
-    if(type == 'micro_hash'){
-        value = true
-    }
-    else if (type == "mega_hash"){
-        const tempminer = await Inventoryhistory.findOne({owner: new mongoose.Types.ObjectId(id), minertype: "micro_hash", type: "Buy Micro Hash"})
-        .then(data => data)
-        if(!tempminer){
-            value = false
+//     if(type == 'micro_hash'){
+//         value = true
+//     }
+//     else if (type == "mega_hash"){
+//         const tempminer = await Inventoryhistory.findOne({owner: new mongoose.Types.ObjectId(id), minertype: "micro_hash", type: "Buy Micro Hash"})
+//         .then(data => data)
+//         if(!tempminer){
+//             value = false
+//         }
+//     }
+
+//     else if (type == "giga_hash"){
+//         const tempminer = await Inventoryhistory.findOne({owner: new mongoose.Types.ObjectId(id), minertype: "giga_hash", type: "Buy Giga Hash"})
+//         .then(data => data)
+//         const tempminer1 = await Inventoryhistory.findOne({owner: new mongoose.Types.ObjectId(id), minertype: "micro_hash", type: "Buy Micro Hash"})
+//         .then(data => data)
+
+//         if(!tempminer || !tempminer1){
+//             value = false
+//         }
+
+//     } 
+
+//     const isskip = await Skip.findOne({owner: new mongoose.Types.ObjectId(id)})
+//     .then(data => data)
+//     .catch(err => {
+//         console.log(`There's a problem fetching skip. Error: ${err}`)
+//         return res.status(400).json({ message: "bad-request", data: "There's a problem with the server. Please contact customer support for more details."})
+//     })
+
+//     if(isskip !== null){
+//         value = true
+//     }
+
+//     return res.status(200).json({ message: "success", data: value})
+// }
+
+exports.getUserMiner = async (req, res) => {
+    const { id } = req.user;
+    const { type } = req.query;
+
+    try {
+        let value = true;
+
+        if (type === 'micro_hash') {
+            value = false;
+
+        } else if (type === 'mega_hash') {
+            const hasMicro = await Inventoryhistory.findOne({
+                owner: new mongoose.Types.ObjectId(id),
+                minertype: "micro_hash",
+                type: "Buy Micro Hash"
+            });
+
+            if (hasMicro) {
+                value = true;
+            }
+
+        } else if (type === 'giga_hash') {
+            const hasGiga = await Inventoryhistory.findOne({
+                owner: new mongoose.Types.ObjectId(id),
+                minertype: "giga_hash",
+                type: "Buy Giga Hash"
+            });
+
+            const hasMicro = await Inventoryhistory.findOne({
+                owner: new mongoose.Types.ObjectId(id),
+                minertype: "micro_hash",
+                type: "Buy Micro Hash"
+            });
+
+            if (hasGiga && hasMicro) {
+                value = true;
+            }
         }
+
+        return res.status(200).json({ message: "success", data: value });
+
+    } catch (err) {
+        console.error(`Error fetching user miner info: ${err}`);
+        return res.status(400).json({
+            message: "bad-request",
+            data: "There's a problem with the server. Please contact customer support for more details."
+        });
     }
+};
 
-    else if (type == "giga_hash"){
-        const tempminer = await Inventoryhistory.findOne({owner: new mongoose.Types.ObjectId(id), minertype: "giga_hash", type: "Buy Giga Hash"})
-        .then(data => data)
-        const tempminer1 = await Inventoryhistory.findOne({owner: new mongoose.Types.ObjectId(id), minertype: "micro_hash", type: "Buy Micro Hash"})
-        .then(data => data)
 
-        if(!tempminer || !tempminer1){
-            value = false
-        }
-
-    } 
-
-    const isskip = await Skip.findOne({owner: new mongoose.Types.ObjectId(id)})
-    .then(data => data)
-    .catch(err => {
-        console.log(`There's a problem fetching skip. Error: ${err}`)
-        return res.status(400).json({ message: "bad-request", data: "There's a problem with the server. Please contact customer support for more details."})
-    })
-
-    if(isskip !== null){
-        value = true
-    }
-
-    return res.status(200).json({ message: "success", data: value})
-}
 
 exports.editMiner = async (req, res) => {
 

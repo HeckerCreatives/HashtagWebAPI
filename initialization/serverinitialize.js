@@ -136,7 +136,7 @@ exports.initialize = async (req, res) => {
 
 
     if(sociallinks.length <= 0){
-        const socialinksdata = ["facebook", "discord", "telegram", "tiktok"]
+        const socialinksdata = ["facebook", "telegram", "instagram", "x"]
 
         const socialinksbulkwrite = socialinksdata.map(titles => ({
             insertOne: {
