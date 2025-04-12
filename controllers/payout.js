@@ -188,11 +188,10 @@ exports.getpayoutlist = async (req, res) => {
             }
         });
     }
-
     if (methodtype) {
         payoutpipelinelist.splice(1, 0, {
             $match: {
-                "paymentmethod": methodtype
+                "paymentmethod": { $regex: new RegExp(methodtype, 'i') }
             }
         });
     }
