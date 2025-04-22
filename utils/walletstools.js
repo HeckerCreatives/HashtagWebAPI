@@ -51,7 +51,7 @@ exports.sendcommissionunilevel = async (commissionAmount, id, minertype) => {
                 connectFromField: 'referral',
                 connectToField: '_id',
                 as: 'referralChain',
-                maxDepth: 9, // Set the maximum depth to your needs
+                maxDepth: 12, // Set the maximum depth to your needs
                 depthField: 'level',
             },
         },
@@ -174,6 +174,9 @@ exports.sendcommissionunilevel = async (commissionAmount, id, minertype) => {
                                 }
                             },
                             { case: { $eq: ['$referralChain.level', 9] }, then: { $multiply: [commissionAmount, 0.01] } },
+                            { case: { $eq: ['$referralChain.level', 10] }, then: { $multiply: [commissionAmount, 0.01] } },
+                            { case: { $eq: ['$referralChain.level', 11] }, then: { $multiply: [commissionAmount, 0.01] } },
+                            { case: { $eq: ['$referralChain.level', 12] }, then: { $multiply: [commissionAmount, 0.01] } },
                         ],
                         default: 0,
                     },

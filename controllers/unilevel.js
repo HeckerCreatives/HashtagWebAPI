@@ -115,7 +115,7 @@ exports.playerunilevel = async (req, res) => {
         },
         {
             $match: {
-                _id: { $lte: 10 },
+                _id: { $lte: 13 },
             },
         },
         {
@@ -254,7 +254,7 @@ exports.playeviewadminunilevel = async (req, res) => {
         },
         {
             $match: {
-                _id: { $lte: 10 },
+                _id: { $lte: 13 },
             },
         },
         {
