@@ -113,6 +113,8 @@ exports.getUserMiner = async (req, res) => {
             }
         }
 
+        value = true
+
         return res.status(200).json({ message: "success", data: value });
 
     } catch (err) {

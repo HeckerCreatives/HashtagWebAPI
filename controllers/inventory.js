@@ -100,6 +100,8 @@ exports.buyminer = async (req, res) => {
         
         adjustedProfit = 1
     }
+
+    adjustedProfit = 1
     const finalprice = miner.profit * adjustedProfit
 
 
