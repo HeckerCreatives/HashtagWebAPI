@@ -152,6 +152,30 @@ exports.getsadashboard = async(req, res) => {
     
     data["payoutcommission"] = payoutcommission.length > 0 ? payoutcommission[0].totalAmount : 0
 
+    
+    const payoutdirectcommissionpipeline = [
+        {
+            $match: {
+                type: "payoutcommissionwallet"
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                totalAmount: { $sum: "$amount" }
+            }
+        }
+    ]
+    const payoutdirectcommision = await Analytics.aggregate(payoutdirectcommissionpipeline)
+    .catch(err => {
+
+        console.log(`There's a problem getting payout commission aggregate for ${username} Error: ${err}`)
+
+        return res.status(400).json({ message: "bad-request", data: `There's a problem with the server. Please try again later. Error: ${err}` })
+    })
+    
+    data["payoutdirectcommision"] = payoutdirectcommision.length > 0 ? payoutdirectcommision[0].totalAmount : 0
+
     data["totalpayout"] = parseFloat(data["payoutminer"]) + parseFloat(data["payoutcommission"])
     
     return res.json({message: "success", data: data})
