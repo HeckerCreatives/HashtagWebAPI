@@ -510,7 +510,7 @@ exports.getplayerinventoryforsuperadmin = async (req, res) => {
         const {_id, type, price, profit, duration, startdate, createdAt} = dataminer
 
         const earnings = getfarm(startdate, AddUnixtimeDay(startdate, duration), (price * profit) + price)
-        const remainingtime = RemainingTime(parseFloat(startdate), AddUnixtimeDay(startdate, duration))
+        const remainingtime = RemainingTime(parseFloat(startdate), duration)
 
         data.inventory[index] = {
             minerid: _id,
@@ -535,15 +535,11 @@ exports.maxplayerinventorysuperadmin = async (req, res) => {
     
     const {id, username} = req.user
 
-    const {playerid, botid} = req.body
-    
-    if (!mongoose.Types.ObjectId.isValid(playerid)) {
-        return res.status(400).json({ message: 'Invalid user ID' });
-    }
+    const {botid} = req.body
 
     try {    
     
-        const bot = await Inventory.findOne({ owner: new mongoose.Types.ObjectId(playerid), _id: new mongoose.Types.ObjectId(botid) })
+        const bot = await Inventory.findOne({_id: new mongoose.Types.ObjectId(botid) })
         .then(data => data)
 
         bot.duration = 0.0007
