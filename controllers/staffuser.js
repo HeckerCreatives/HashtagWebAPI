@@ -153,10 +153,10 @@ exports.getsadashboard = async(req, res) => {
     data["payoutcommission"] = payoutcommission.length > 0 ? payoutcommission[0].totalAmount : 0
 
     
-    const payoutdirectcommissionpipeline = [
+    const directcommisionpipeline = [
         {
             $match: {
-                type: "payoutcommissionwallet"
+                type: "directcommissionwallet"
             }
         },
         {
@@ -166,15 +166,39 @@ exports.getsadashboard = async(req, res) => {
             }
         }
     ]
-    const payoutdirectcommision = await Analytics.aggregate(payoutdirectcommissionpipeline)
+    const directcommision = await Analytics.aggregate(directcommisionpipeline)
     .catch(err => {
 
-        console.log(`There's a problem getting payout commission aggregate for ${username} Error: ${err}`)
+        console.log(`There's a problem getting direct commission aggregate for ${username} Error: ${err}`)
 
         return res.status(400).json({ message: "bad-request", data: `There's a problem with the server. Please try again later. Error: ${err}` })
     })
     
-    data["payoutdirectcommision"] = payoutdirectcommision.length > 0 ? payoutdirectcommision[0].totalAmount : 0
+    data["directcommision"] = directcommision.length > 0 ? directcommision[0].totalAmount : 0
+
+        
+    const unilevelcommisionpipeline = [
+        {
+            $match: {
+                type: "commissionwallet"
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                totalAmount: { $sum: "$amount" }
+            }
+        }
+    ]
+    const unilevelcommision = await Analytics.aggregate(unilevelcommisionpipeline)
+    .catch(err => {
+
+        console.log(`There's a problem getting direct unilevel aggregate for ${username} Error: ${err}`)
+
+        return res.status(400).json({ message: "bad-request", data: `There's a problem with the server. Please try again later. Error: ${err}` })
+    })
+    
+    data["unilevelcommision"] = unilevelcommision.length > 0 ? unilevelcommision[0].totalAmount : 0
 
     data["totalpayout"] = parseFloat(data["payoutminer"]) + parseFloat(data["payoutcommission"])
     
