@@ -13,10 +13,6 @@ exports.requestpayout = async (req, res) => {
     const {id, username} = req.user
     const {type, payoutvalue, paymentmethod, accountname, accountnumber} = req.body
 
-    if (payoutvalue < 500){
-        return res.status(400).json({message: "failed", data: "Minimum cashout is ₱500"})
-    }
-
     if(paymentmethod.toLowerCase() === 'gcash' && payoutvalue > 5000){
         return res.status(400).json({message: "failed", data: "Gcash pay out maximum value is ₱5000."})
     }
