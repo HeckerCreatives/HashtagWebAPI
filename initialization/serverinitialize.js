@@ -174,5 +174,39 @@ exports.initialize = async (req, res) => {
         console.log("Global Password Created")
     }
 
+
+    const newwallets = ["directwallet", "unilevelwallet"]
+
+ 
+    const allUsers = await Users.find()
+    .then(data => data)
+    .catch(err => {
+        console.log(`There's a problem getting all user data ${err}`)
+        return
+    })
+
+    if (allUsers.length > 0){
+        allUsers.forEach(async (user) => {
+            const existingWallets = await Userwallets.find({ owner: user._id })
+                .then(data => data)
+                .catch(err => {
+                    console.log(`There's a problem getting user wallets ${err}`)
+                    return
+                });
+
+            const existingWalletTypes = existingWallets.map(wallet => wallet.type);
+
+            newwallets.forEach(async (walletType) => {
+                if (!existingWalletTypes.includes(walletType)) {
+                    await Userwallets.create({ owner: user._id, type: walletType, amount: 0 })
+                        .catch(err => {
+                            console.log(`There's a problem creating user wallets ${err}`)
+                            return
+                        });
+                }
+            });
+        });
+    }
+
     console.log("Server Initialization Success")
 }

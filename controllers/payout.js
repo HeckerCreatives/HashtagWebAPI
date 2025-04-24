@@ -45,15 +45,87 @@ exports.requestpayout = async (req, res) => {
         return res.status(400).json({ message: "bad-request", data: "There's a problem with the server! Please contact customer support for more details." })
     })
 
-    if (payoutvalue > wallet.amount){
-        return res.status(400).json({ message: "failed", data: "The amount is greater than your wallet balance" })
-    }
+    const unilevelwallet = await Userwallets.findOne({ owner: new mongoose.Types.ObjectId(id), type: "unilevelwallet" })
+    .then((data) => data)
+    .catch((err) => {
+        console.log(`There's a problem getting unilevel wallet data ${err}`);
+        return res.status(400).json({
+            message: "bad-request",
+            data: "There's a problem with the server! Please contact customer support for more details."
+        });
+    });
 
-    await Userwallets.findOneAndUpdate({owner: new mongoose.Types.ObjectId(id), type: type}, {$inc: {amount: -payoutvalue}})
-    .catch(err => {
-        console.log(`There's a problem deducting payout value for ${username} with value ${payoutvalue}. Error: ${err}`)
-        return res.status(400).json({ message: "bad-request", data: "There's a problem with the server! Please contact customer support for more details." })
-    })
+    const directwallet = await Userwallets.findOne({ owner: new mongoose.Types.ObjectId(id), type: "directwallet" })
+        .then((data) => data)
+        .catch((err) => {
+            console.log(`There's a problem getting direct wallet data ${err}`);
+            return res.status(400).json({
+                message: "bad-request", 
+                data: "There's a problem with the server! Please contact customer support for more details."
+            });
+        });
+    
+    let totalBalance = 0
+
+        if(type == "commissionwallet"){
+        totalBalance = unilevelwallet.amount + directwallet.amount;
+       } else if (type == "minecoinwallet"){
+           totalBalance = wallet.amount
+       }
+   
+       if (payoutvalue > totalBalance) {
+           return res.status(400).json({
+               message: "failed",
+               data: "The amount is greater than your wallet balance"
+           });
+       }
+
+       const balanceleft = totalBalance - payoutvalue
+
+
+       if (type == "commissionwallet") {
+        await Userwallets.findOneAndUpdate(
+            { owner: new mongoose.Types.ObjectId(id), type: type },
+            { $set: { amount: balanceleft } }
+        ).catch((err) => {
+            console.log(`There's a problem deducting payout value for ${username} with value ${payoutvalue}. Error: ${err}`);
+            return res.status(400).json({
+                message: "bad-request",
+                data: "There's a problem with the server! Please contact customer support for more details."
+            });
+        });
+        
+        if (payoutvalue > directwallet.amount) {
+            const deductamount =  payoutvalue - directwallet.amount
+            
+            directwallet.amount = 0
+            
+            unilevelwallet.amount = unilevelwallet.amount - deductamount
+            
+            await unilevelwallet.save()
+            await directwallet.save()
+        } else {
+            const deductamount = directwallet.amount - payoutvalue
+            directwallet.amount = deductamount
+            await directwallet.save()
+        }
+        } else if (type == "minecoinwallet") {
+            await Userwallets.findOneAndUpdate(
+                { owner: new mongoose.Types.ObjectId(id), type: type },
+                { $inc: { amount: -payoutvalue } }
+            ).catch((err) => {
+                console.log(`There's a problem deducting payout value for ${username} with value ${payoutvalue}. Error: ${err}`);
+                return res.status(400).json({
+                    message: "bad-request",
+                    data: "There's a problem with the server! Please contact customer support for more details."
+                });
+            });
+        } else {
+            return res.status(400).json({
+                message: "failed",
+                data: "Invalid wallet type."
+            });
+        }
 
     await Payout.create({owner: new mongoose.Types.ObjectId(id), status: "processing", value: payoutvalue, type: type, paymentmethod: paymentmethod, accountname: accountname, accountnumber: accountnumber})
     .catch(async err => {
@@ -455,6 +527,13 @@ exports.processpayout = async (req, res) => {
     
             return res.status(400).json({ message: 'failed', data: `There's a problem with your account. Please contact customer support for more details` })
         })
+        await Userwallets.findOneAndUpdate({owner: new mongoose.Types.ObjectId(playerid), type: "directwallet"}, {$inc: {amount: payoutvalue}})
+        .catch(err => {
+
+            console.log(`Failed to process Payout data for ${username}, player: ${playerid}, payinid: ${payinid} error: ${err}`)
+    
+            return res.status(400).json({ message: 'failed', data: `There's a problem with your account. Please contact customer support for more details` })
+        })
     }
     else{
 
@@ -501,13 +580,25 @@ exports.deletepayout = async (req, res) => {
 
     console.log(`Payout request id: ${payoutdata._id}  owner: ${payoutdata.owner}  type: ${payoutdata.type}  amount: ${payoutdata.value}`)
 
-    await Userwallets.findOneAndUpdate({owner: new mongoose.Types.ObjectId(payoutdata.owner), type: payoutdata.type}, {$inc: {amount: payoutdata.value}})
+    if (payoutdata.status === "processing"){
+        await Userwallets.findOneAndUpdate({owner: new mongoose.Types.ObjectId(payoutdata.owner), type: payoutdata.type}, {$inc: {amount: payoutdata.value}})
     .catch(err => {
 
         console.log(`Failed to update userwallet data for ${payoutdata.owner} with value ${payoutdata.value}, error: ${err}`)
 
         return res.status(400).json({ message: 'failed', data: `There's a problem with your account. Please contact customer support for more details` })
     })
+
+        if(payoutdata.type == "commissionwallet"){
+            await Userwallets.findOneAndUpdate({owner: new mongoose.Types.ObjectId(payoutdata.owner), type: "directwallet"}, {$inc: {amount: payoutdata.value}})
+            .catch(err => {
+
+                console.log(`Failed to update userwallet data for ${payoutdata.owner} with value ${payoutdata.value}, error: ${err}`)
+
+                return res.status(400).json({ message: 'failed', data: `There's a problem with your account. Please contact customer support for more details` })
+            })
+        }
+    }
 
     return res.json({message: "success"})
 }

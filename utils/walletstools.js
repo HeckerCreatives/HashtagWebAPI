@@ -212,13 +212,14 @@ exports.sendcommissionunilevel = async (commissionAmount, id, minertype) => {
             historypipeline.push({owner: new mongoose.Types.ObjectId(_id), type: "directcommissionwallet", amount: amount, minertype: minertype, from: new mongoose.Types.ObjectId(id)})
 
             analyticspipeline.push({owner: new mongoose.Types.ObjectId(_id), type: "directcommissionwallet", description: `Unilevel from ${id} to ${_id} with commission total amount of ${commissionAmount} and direct commission amount of ${amount}`, amount: amount})
-        }
-        else{
+        } else {
             historypipeline.push({owner: new mongoose.Types.ObjectId(_id), type: "commissionwallet", amount: amount, minertype: minertype, from: new mongoose.Types.ObjectId(id)})
     
             analyticspipeline.push({owner: new mongoose.Types.ObjectId(_id), type: "commissionwallet", description: `Unilevel from ${id} to ${_id} with commission total amount of ${commissionAmount} and commission amount of ${amount}`, amount: amount})
         }
     })
+
+
 
     const bulkOperationUnilvl = unilevelresult.map(({_id, amount }) => ({
         updateOne: {
@@ -227,7 +228,25 @@ exports.sendcommissionunilevel = async (commissionAmount, id, minertype) => {
         }
     }))
 
+    const bulkOperationUnilvl2 = unilevelresult.map(({_id, amount, level }) => ({
+        updateOne: {
+            filter: { 
+                owner: new mongoose.Types.ObjectId(_id), 
+                type: level === 0 ? 'directwallet' : 'unilevelwallet'
+            },
+            update: { $inc: { amount: amount }}
+        }
+    }));
+
     await Userwallets.bulkWrite(bulkOperationUnilvl)
+    .catch(err => {
+
+        console.log(`Failed to distribute commission wallet data, unilevel parent: ${id} commission amount: ${commissionAmount}, error: ${err}`)
+
+        return "failed"
+    })
+
+    await Userwallets.bulkWrite(bulkOperationUnilvl2)
     .catch(err => {
 
         console.log(`Failed to distribute commission wallet data, unilevel parent: ${id} commission amount: ${commissionAmount}, error: ${err}`)
