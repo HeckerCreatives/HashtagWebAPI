@@ -371,7 +371,7 @@ exports.getuserdetailsbysuperadmin = async (req, res) => {
 
     const data = {
         username: userdetails.username,
-        referral: userdetails.referral.username,
+        referral: userdetails.referral == null ? "" : userdetails.referral.username,
         banstatus: userdetails.status
     }
 
