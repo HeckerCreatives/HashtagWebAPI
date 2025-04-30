@@ -267,7 +267,8 @@ exports.getplayercount = async (req, res) => {
     data = {
         totalusers: totalusers,
         activeusers: activeusers[0] ? activeusers[0].totalUsers : 0,
-        banusers: banusers
+        banusers: banusers,
+        totalplayers: totalusers - banusers
     }
 
     return res.json({message: "success", data: data})
