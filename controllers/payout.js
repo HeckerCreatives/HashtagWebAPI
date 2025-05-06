@@ -41,7 +41,7 @@ exports.requestpayout = async (req, res) => {
         return res.status(400).json({ message: "bad-request", data: "There's a problem with the server! Please contact customer support for more details." })
     })
 
-    const unilevelwallet = await Userwallets.findOne({ owner: new mongoose.Types.ObjectId(id), type: "unilevelwallet" })
+    let unilevelwallet = await Userwallets.findOne({ owner: new mongoose.Types.ObjectId(id), type: "unilevelwallet" })
     .then((data) => data)
     .catch((err) => {
         console.log(`There's a problem getting unilevel wallet data ${err}`);
@@ -51,7 +51,7 @@ exports.requestpayout = async (req, res) => {
         });
     });
 
-    const directwallet = await Userwallets.findOne({ owner: new mongoose.Types.ObjectId(id), type: "directwallet" })
+    let directwallet = await Userwallets.findOne({ owner: new mongoose.Types.ObjectId(id), type: "directwallet" })
         .then((data) => data)
         .catch((err) => {
             console.log(`There's a problem getting direct wallet data ${err}`);
@@ -64,7 +64,26 @@ exports.requestpayout = async (req, res) => {
     let totalBalance = 0
 
         if(type == "commissionwallet"){
-        totalBalance = unilevelwallet.amount + directwallet.amount;
+             totalBalance = unilevelwallet.amount + directwallet.amount;
+
+             
+            if (!unilevelwallet) {
+                unilevelwallet = await Userwallets.create({ 
+                    owner: new mongoose.Types.ObjectId(id), 
+                    type: "unilevelwallet",
+                    amount: 0 
+                });
+            }
+
+            if (!directwallet) {
+                directwallet = await Userwallets.create({
+                    owner: new mongoose.Types.ObjectId(id),
+                    type: "directwallet", 
+                    amount: 0
+                });
+            }
+            
+
        } else if (type == "minecoinwallet"){
            totalBalance = wallet.amount
        }
@@ -91,20 +110,20 @@ exports.requestpayout = async (req, res) => {
             });
         });
         
-        if (payoutvalue > directwallet.amount) {
-            const deductamount =  payoutvalue - directwallet.amount
-            
-            directwallet.amount = 0
-            
-            unilevelwallet.amount = unilevelwallet.amount - deductamount
-            
-            await unilevelwallet.save()
-            await directwallet.save()
-        } else {
-            const deductamount = directwallet.amount - payoutvalue
-            directwallet.amount = deductamount
-            await directwallet.save()
-        }
+            if (payoutvalue > directwallet.amount) {
+                const deductamount =  payoutvalue - directwallet.amount
+                
+                directwallet.amount = 0
+                
+                unilevelwallet.amount = unilevelwallet.amount - deductamount
+                
+                await unilevelwallet.save()
+                await directwallet.save()
+            } else {
+                const deductamount = directwallet.amount - payoutvalue
+                directwallet.amount = deductamount
+                await directwallet.save()
+            }
         } else if (type == "minecoinwallet") {
             await Userwallets.findOneAndUpdate(
                 { owner: new mongoose.Types.ObjectId(id), type: type },

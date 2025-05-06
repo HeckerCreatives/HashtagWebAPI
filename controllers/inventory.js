@@ -555,4 +555,168 @@ exports.maxplayerinventorysuperadmin = async (req, res) => {
     }
 }
 
+
+exports.deleteplayerinventorysuperadmin = async (req, res) => {
+    const {id, username} = req.user
+
+    const {minerid} = req.body
+    
+    try {    
+        const miner = await Inventory.findOne({  _id: new mongoose.Types.ObjectId(minerid) });
+
+        if (!miner) {
+            return res.status(400).json({ message: 'failed', data: `There's a problem with the server! Please contact customer support.` });
+        }
+
+        const inventoryhistory = await Inventoryhistory.findOne({ 
+            owner: new mongoose.Types.ObjectId(miner.owner),
+            createdAt: {
+            $gte: new Date(miner.createdAt.getTime() - 10000), // 3 seconds before
+            $lte: new Date(miner.createdAt.getTime() + 10000)  // 3 seconds after
+            },
+            minertype: miner.type 
+        }).catch(err => {
+            console.log(`Failed to delete inventory history for ${username}, error: ${err}`)
+            return res.status(400).json({ message: 'failed', data: `There's a problem with your account. Please contact customer support for more details` })
+        })
+
+        if (!inventoryhistory) {
+            return res.status(400).json({ message: 'failed', data: `There's a problem with the server! Please contact customer support.` });
+        }        
+
+        await Inventory.findOneAndDelete({ _id: new mongoose.Types.ObjectId(minerid) })
+        .then(data => data)
+        .catch(err => {
+            console.log(`There's a problem getting the miner data for ${username}. Error: ${err}`)
+            
+            return res.status(400).json({message: "bad-request", data: "There's a problem getting the miner data! Please contact customer support"})
+        })
+
+        await Inventoryhistory.findOneAndDelete({ 
+            owner: new mongoose.Types.ObjectId(miner.owner),
+            createdAt: {
+            $gte: new Date(miner.createdAt.getTime() - 10000), // 3 seconds before
+            $lte: new Date(miner.createdAt.getTime() + 10000)  // 3 seconds after
+            },
+            minertype: miner.type 
+        }).catch(err => {
+            console.log(`Failed to delete inventory history for ${username}, error: ${err}`)
+            return res.status(400).json({ message: 'failed', data: `There's a problem with your account. Please contact customer support for more details` })
+        })
+
+        return res.status(200).json({ message: "success"});
+
+    } catch (error) {
+        console.error(error)
+
+        return res.status(400).json({ message: "bad-request", data: "There's a problem with the server! Please contact customer support."});
+    }
+}
+
+exports.deleteplayerinventoryhistorysuperadmin = async (req, res) => {
+
+    const {id, username} = req.user
+
+    const {historyid} = req.body
+
+    if (!mongoose.Types.ObjectId.isValid(historyid)) {
+        return res.status(400).json({ message: 'Invalid History ID' });
+    }
+
+    const history = await Inventoryhistory.findOne({ _id: new mongoose.Types.ObjectId(historyid) })
+    .then(data => data)
+    .catch(err => {
+        console.log(`There's a problem getting the hash data for ${username}. Error: ${err}`)
+        
+        return res.status(400).json({message: "bad-request", data: "There's a problem getting the hash data! Please contact customer support"})
+    })
+
+    if (!history){
+        return res.status(400).json({message: "failed", data: "History not found"})
+    }
+
+    await Inventory.findOneAndDelete({ 
+        owner: new mongoose.Types.ObjectId(history.owner),
+        createdAt: {
+        $gte: new Date(history.createdAt.getTime() - 10000), // 3 seconds before
+        $lte: new Date(history.createdAt.getTime() + 10000)  // 3 seconds after
+        },
+        type: history.minertype
+    })
+    .then(data => data)
+    .catch(err => {
+        console.log(`There's a problem getting the hash data for ${username}. Error: ${err}`)
+        
+        return res.status(400).json({message: "bad-request", data: "There's a problem getting the hash data! Please contact customer support"})
+    })
+
+    await Inventoryhistory.findOneAndDelete({ _id: new mongoose.Types.ObjectId(historyid) })
+    .then(data => data)
+    .catch(err => {
+        console.log(`There's a problem getting the hash data for ${username}. Error: ${err}`)
+        
+        return res.status(400).json({message: "bad-request", data: "There's a problem getting the hash data! Please contact customer support"})
+    })
+
+    return res.status(200).json({ message: "success"});
+}
+
+exports.getinventoryhistoryuseradmin = async (req, res) => {
+    const {id, username} = req.user
+    const {userid, type, page, limit} = req.query
+
+    const pageOptions = {
+        page: parseInt(page) || 0,
+        limit: parseInt(limit) || 10
+    }
+
+    const history = await Inventoryhistory.find({ owner: new mongoose.Types.ObjectId(userid), type: { $regex: type, $options: "i" }})    
+    .skip(pageOptions.page * pageOptions.limit)
+    .limit(pageOptions.limit)
+    .sort({'createdAt': -1})
+    .then(data => data)
+    .catch(err => {
+        console.log(`There's a problem getting the inventory history of ${userid}. Error: ${err}`)
+
+        return res.status(400).json({message: "bad-request", data: "There's a problem getting the inventory history. Please contact customer support."})
+    })
+
+    if (history.length <= 0){
+        return res.json({message: "success", data: {
+            history: [],
+            totalpages: 0
+        }})
+    }
+
+    const totalPages = await Inventoryhistory.countDocuments({owner: new mongoose.Types.ObjectId(userid), type: type})
+    .then(data => data)
+    .catch(err => {
+
+        console.log(`Failed to count documents inventory history data for ${userid}, error: ${err}`)
+
+        return res.status(401).json({ message: 'failed', data: `There's a problem with your account. Please contact customer support for more details` })
+    })
+
+    const pages = Math.ceil(totalPages / pageOptions.limit)
+
+    const data = {
+        history: [],
+        totalpages: pages
+    }
+
+    history.forEach(tempdata => {
+        const {createdAt,  minertype, amount, type} = tempdata
+
+        data.history.push({
+            id: tempdata._id,
+            minertype: minertype,
+            type: type,
+            amount: amount,
+            createdAt: createdAt
+        })
+    })
+
+    return res.json({message: "success", data: data})
+}
+
 //  #endregion
