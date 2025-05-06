@@ -1,5 +1,5 @@
 const router = require("express").Router()
-const { getremainingunclaimedminer, buyminer, getinventory, getclaimhistory, getbuyhistory, claimminer, getplayerinventoryforsuperadmin, maxplayerinventorysuperadmin, deleteplayerinventoryhistorysuperadmin, getinventoryhistoryuseradmin } = require("../controllers/inventory")
+const { getremainingunclaimedminer, buyminer, getinventory, getclaimhistory, getbuyhistory, claimminer, getplayerinventoryforsuperadmin, maxplayerinventorysuperadmin, deleteplayerinventoryhistorysuperadmin, getinventoryhistoryuseradmin, deleteplayerinventorysuperadmin } = require("../controllers/inventory")
 const { protectplayer, protectsuperadmin } = require("../middleware/middleware")
 
 router
