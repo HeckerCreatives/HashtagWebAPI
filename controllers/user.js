@@ -384,7 +384,8 @@ exports.getuserdetailsbysuperadmin = async (req, res) => {
     const data = {
         username: userdetails.username,
         referral: userdetails.referral == null ? "" : userdetails.referral.username,
-        banstatus: userdetails.status
+        banstatus: userdetails.status,
+        referralid: userdetails.referral?._id == null ? "" : userdetails.referral._id
     }
 
     return res.json({message: "success", data: data})
