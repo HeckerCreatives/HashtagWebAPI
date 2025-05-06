@@ -249,14 +249,28 @@ exports.getplayerwallethistoryforadmin = async (req, res) => {
         limit: parseInt(limit) || 10
     };
     
+    let wallettype
+    
     let wallethistorypipeline
 
+    if (type == "creditwallet"){
+        wallettype = "creditwallet"
+    }
+    else if (type == "minecoinwallet"){
+        wallettype = "minecoinwallet"
+    }
+    else if (type == "directwallet"){
+        wallettype = "directcommissionwallet"
+    }
+    else if (type == "commissionwallet"){
+        wallettype = "commissionwallet"
+    }
     if (type == "creditwallet" || type == "minecoinwallet"){
         wallethistorypipeline = [
             {
                 $match: {
                     owner: new mongoose.Types.ObjectId(playerid), 
-                    type: type
+                    type: wallettype
                 }
             },
             {
@@ -303,7 +317,7 @@ exports.getplayerwallethistoryforadmin = async (req, res) => {
             {
                 $match: {
                     owner: new mongoose.Types.ObjectId(playerid), 
-                    type: type
+                    type: wallettype
                 }
             },
             {
