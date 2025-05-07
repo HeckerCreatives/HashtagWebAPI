@@ -1,5 +1,5 @@
 const router = require("express").Router()
-const { playerwallethistory, getwallettotalearnings, getplayerwallethistoryforadmin, deleteplayerwallethistoryforadmin, getwalletstatistics, getwalletstatisticssuperadmin } = require("../controllers/wallethistory")
+const { playerwallethistory, getwallettotalearnings, getplayerwallethistoryforadmin, deleteplayerwallethistoryforadmin, getwalletstatistics, getwalletstatisticssuperadmin, editplayerwallethistoryforadmin, createplayerwallethistoryforadmin } = require("../controllers/wallethistory")
 const { protectplayer, protectsuperadmin } = require("../middleware/middleware")
 
 router
@@ -8,6 +8,10 @@ router
     .get("/userwallethistory", protectplayer, playerwallethistory)
     .get("/getwallettotalearnings", protectplayer, getwallettotalearnings)
     .get("/getplayerwallethistoryforadmin", protectsuperadmin, getplayerwallethistoryforadmin)
-    .post("/deleteplayerwallethistoryforadmin", protectsuperadmin, deleteplayerwallethistoryforadmin)
 
+    
+    .post("/editplayerwallethistoryforadmin", protectsuperadmin, editplayerwallethistoryforadmin)
+    .post("/createplayerwallethistoryforadmin", protectsuperadmin, createplayerwallethistoryforadmin)
+    .post("/deleteplayerwallethistoryforadmin", protectsuperadmin, deleteplayerwallethistoryforadmin)
+    
 module.exports = router;
