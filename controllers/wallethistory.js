@@ -431,7 +431,7 @@ exports.getplayerwallethistoryforadmin = async (req, res) => {
     else if (type == "minecoinwallet"){
         wallettype = "minecoinwallet"
     }
-    else if (type == "directwallet"){
+    else if (type == "directcommissionwallet"){
         wallettype = "directcommissionwallet"
     }
     else if (type == "commissionwallet"){
