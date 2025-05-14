@@ -460,15 +460,15 @@ exports.processpayout = async (req, res) => {
             return res.status(400).json({ message: 'failed', data: `There's a problem with your account. Please contact customer support for more details` })
         })
 
-        if (wallettype == "commissionwallet"){
-            await Userwallets.findOneAndUpdate({owner: new mongoose.Types.ObjectId(playerid), type: "directwallet"}, {$inc: {amount: payoutvalue}})
-            .catch(err => {
+        // if (wallettype == "commissionwallet"){
+        //     await Userwallets.findOneAndUpdate({owner: new mongoose.Types.ObjectId(playerid), type: "directwallet"}, {$inc: {amount: payoutvalue}})
+        //     .catch(err => {
 
-                console.log(`Failed to process Payout data for ${username}, player: ${playerid}, payinid: ${payinid} error: ${err}`)
+        //         console.log(`Failed to process Payout data for ${username}, player: ${playerid}, payinid: ${payinid} error: ${err}`)
         
-                return res.status(400).json({ message: 'failed', data: `There's a problem with your account. Please contact customer support for more details` })
-            })
-        }
+        //         return res.status(400).json({ message: 'failed', data: `There's a problem with your account. Please contact customer support for more details` })
+        //     })
+        // }
     }
     else{
 
@@ -524,15 +524,15 @@ exports.deletepayout = async (req, res) => {
         return res.status(400).json({ message: 'failed', data: `There's a problem with your account. Please contact customer support for more details` })
     })
 
-        if(payoutdata.type == "commissionwallet"){
-            await Userwallets.findOneAndUpdate({owner: new mongoose.Types.ObjectId(payoutdata.owner), type: "directwallet"}, {$inc: {amount: payoutdata.value}})
-            .catch(err => {
+        // if(payoutdata.type == "commissionwallet"){
+        //     await Userwallets.findOneAndUpdate({owner: new mongoose.Types.ObjectId(payoutdata.owner), type: "directwallet"}, {$inc: {amount: payoutdata.value}})
+        //     .catch(err => {
 
-                console.log(`Failed to update userwallet data for ${payoutdata.owner} with value ${payoutdata.value}, error: ${err}`)
+        //         console.log(`Failed to update userwallet data for ${payoutdata.owner} with value ${payoutdata.value}, error: ${err}`)
 
-                return res.status(400).json({ message: 'failed', data: `There's a problem with your account. Please contact customer support for more details` })
-            })
-        }
+        //         return res.status(400).json({ message: 'failed', data: `There's a problem with your account. Please contact customer support for more details` })
+        //     })
+        // }
     }
 
     return res.json({message: "success"})
