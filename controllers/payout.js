@@ -14,7 +14,7 @@ exports.requestpayout = async (req, res) => {
     const {type, payoutvalue, paymentmethod, accountname, accountnumber} = req.body
 
     if (payoutvalue < 500){
-        return res.status(400).json({message: "failed", data: "Minimum cashout is ₱500"})
+        return res.status(400).json({message: "failed1", data: "Minimum cashout is ₱500"})
     }
 
     if(paymentmethod.toLowerCase() === 'gcash') {
@@ -73,7 +73,7 @@ exports.requestpayout = async (req, res) => {
         return res.status(400).json({ message: "bad-request", data: "There's a problem with the server! Please contact customer support for more details." })
     })
 
-    return res.json({message: "success", data: "auto-push"})
+    return res.json({message: "success"})
 }
 exports.getrequesthistoryplayer = async (req, res) => {
     const {id, username} = req.user
