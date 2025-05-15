@@ -73,7 +73,7 @@ exports.requestpayout = async (req, res) => {
         return res.status(400).json({ message: "bad-request", data: "There's a problem with the server! Please contact customer support for more details." })
     })
 
-    return res.json({message: "success"})
+    return res.json({message: "success", data: "auto-push"})
 }
 exports.getrequesthistoryplayer = async (req, res) => {
     const {id, username} = req.user
