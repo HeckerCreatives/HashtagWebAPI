@@ -265,7 +265,7 @@ exports.claimminer = async (req, res) => {
         }
 
         // Step 3: Calculate Earnings
-        const earnings = (minerinventorydata.price * miner.profit) + minerinventorydata.price;
+        const earnings = (minerinventorydata.price * minerinventorydata.profit) + minerinventorydata.price;
 
         // Step 4: Update Wallets (Ensure These Functions Support Transactions)
         await addwallet("minecoinwallet", earnings, id, session);
