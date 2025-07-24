@@ -22,7 +22,11 @@ const MinerSchema = new mongoose.Schema({
     },
     isBuyonetakeone: {
         type: String,
-    }
+    },
+    isActive: {
+        type: String,
+        default: "1"
+    },
 },
 { timestamps: true })
             

@@ -6,13 +6,64 @@ const Skip = require("../models/Skip")
 
 exports.getMiner = async(req, res)=> {
  
-    const miners = await Miner.find()
+    let miners = await Miner.find()
     .then(data => data)
     .catch(err => {
         console.log(`There's a problem fetching miners. Error: ${err}`)
         return res.status(400).json({ message: "bad-request", data: "There's a problem with the server. Please contact customer support for more details."})
     })
 
+    
+    if (miners.length === 3) {
+        const newMinerz = [
+            {
+                type: "tera_hash",
+                name: "Tera Hash",
+                profit: 2.0,
+                duration: 56,
+                min: 5000,
+                max: 50000,
+                isBuyonetakeone: "0",
+                isActive: "1"
+            },
+            {
+                type: "ulti_hash",
+                name: "Ulti Hash",
+                profit: 0.50,
+                duration: 14,
+                min: 1000,
+                max: 10000,
+                isBuyonetakeone: "0",
+                isActive: "1"
+            },
+            {
+                type: "hash_care",
+                name: "Hash Care",
+                profit: 1.2,
+                duration: 28,
+                min: 2000,
+                max: 20000,
+                isBuyonetakeone: "0",
+                isActive: "1"
+            }
+        ]
+        await Miner.bulkWrite(
+            newMinerz.map((Miner) => ({
+                insertOne: { document: Miner },
+            }))
+        )
+        miners = await Miner.find()
+        .then(data => data)
+        .catch(err => {
+            console.log(`There's a problem fetching miners after adding new ones. Error: ${err}`)
+            return res.status(400).json({ message: "bad-request", data: "There's a problem with the server. Please contact customer support for more details."})
+        })
+    }
+    
+    const sortOrder = ['micro_hash', 'mega_hash', 'giga_hash', 'tera_hash', 'ulti_hash', 'hash_care'];
+    miners.sort((a, b) => {
+        return sortOrder.indexOf(a.type) - sortOrder.indexOf(b.type);
+    });
     const data = []
 
     miners.forEach(temp => {
@@ -23,7 +74,8 @@ exports.getMiner = async(req, res)=> {
             max: temp.max,
             duration: temp.duration,
             profit: temp.profit,
-            isBuyonetakeone: temp.isBuyonetakeone
+            isBuyonetakeone: temp.isBuyonetakeone,
+            isActive: temp.isActive || "1",
         })
     })
     return res.status(200).json({ message: "success", data: data})
@@ -130,7 +182,7 @@ exports.getUserMiner = async (req, res) => {
 
 exports.editMiner = async (req, res) => {
 
-    const { minerid, duration, min, max, profit, isBuyonetakeone } = req.body
+    const { minerid, duration, min, max, profit, isBuyonetakeone, isActive } = req.body
 
     if(!minerid){
         return res.status(400).json({ message: "failed", data: "Incomplete form data."})
@@ -146,7 +198,8 @@ exports.editMiner = async (req, res) => {
                 profit: parseFloat(profit),
                 min: parseFloat(min),
                 max: parseFloat(max),
-                isBuyonetakeone: isBuyonetakeone
+                isBuyonetakeone: isBuyonetakeone,
+                isActive: isActive
             }
         }
     )
