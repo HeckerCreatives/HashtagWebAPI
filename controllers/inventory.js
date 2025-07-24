@@ -200,7 +200,7 @@ exports.getinventory = async (req, res) => {
     let index = 0
 
     miner.forEach(dataminer => {
-        const {_id, type, price, profit, duration, startdate, createdAt} = dataminer
+        const {_id, name, type, price, profit, duration, startdate, createdAt} = dataminer
 
         console.log(startdate, duration)
         console.log(AddUnixtimeDay(startdate, duration))
@@ -210,6 +210,7 @@ exports.getinventory = async (req, res) => {
 
         data.miners[index] = {
             minerid: _id,
+            name: name,
             type: type,
             buyprice: price,
             profit: profit,
@@ -507,13 +508,14 @@ exports.getplayerinventoryforsuperadmin = async (req, res) => {
     let index = 0
 
     miner.forEach(dataminer => {
-        const {_id, type, price, profit, duration, startdate, createdAt} = dataminer
+        const {_id, name, type, price, profit, duration, startdate, createdAt} = dataminer
 
         const earnings = getfarm(startdate, AddUnixtimeDay(startdate, duration), (price * profit) + price)
         const remainingtime = RemainingTime(parseFloat(startdate), duration)
 
         data.inventory[index] = {
             minerid: _id,
+            name: name,
             type: type,
             buyprice: price,
             profit: profit,

@@ -24,7 +24,7 @@ exports.getMiner = async(req, res)=> {
                 min: 5000,
                 max: 50000,
                 isBuyonetakeone: "0",
-                isActive: "1"
+                isActive: "0"
             },
             {
                 type: "ulti_hash",
@@ -34,7 +34,7 @@ exports.getMiner = async(req, res)=> {
                 min: 1000,
                 max: 10000,
                 isBuyonetakeone: "0",
-                isActive: "1"
+                isActive: "0"
             },
             {
                 type: "hash_care",
@@ -44,7 +44,7 @@ exports.getMiner = async(req, res)=> {
                 min: 2000,
                 max: 20000,
                 isBuyonetakeone: "0",
-                isActive: "1"
+                isActive: "0"
             }
         ]
         await Miner.bulkWrite(
