@@ -544,6 +544,10 @@ exports.maxplayerinventorysuperadmin = async (req, res) => {
         const bot = await Inventory.findOne({_id: new mongoose.Types.ObjectId(botid) })
         .then(data => data)
 
+        if (!bot) {
+            return res.status(400).json({ message: 'failed', data: `There's a problem with the server! Please contact customer support.` });
+        }
+        
         bot.duration = 0.0007
 
         await bot.save();
