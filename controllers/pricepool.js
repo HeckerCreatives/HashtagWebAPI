@@ -53,9 +53,14 @@ exports.usergetpricepool = async (req, res) => {
     let boolean = true
     const currentpricepool = await Pricepool.findOne({ status: "current" })
     
-    if (!currentpricepool || !currentpricepool.tiers || currentpricepool.tiers.length === 0) {
-        boolean = false
+    if (!currentpricepool || !Array.isArray(currentpricepool.tiers) || currentpricepool.tiers.length === 0) {
+        return res.status(200).json({
+            message: "success",
+            data: currentpricepool,
+            boolean: false
+        });
     }
+
 
     const { tiers } = currentpricepool;
 
