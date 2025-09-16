@@ -5,6 +5,7 @@ const StaffUserwallets = require("../models/Staffuserwallet")
 const Maintenance = require("../models/Maintenance")
 const { addwallethistory } = require("../utils/wallethistorytools")
 const { addanalytics } = require("../utils/analyticstools")
+const moment = require('moment-timezone')
 const { FormatDate } = require("../utils/datetimetools")
 
 //  #region USER
@@ -29,11 +30,19 @@ exports.requestpayout = async (req, res) => {
     if(paymentmethod.toLowerCase() === 'gotyme' && payoutvalue < 500){
         return res.status(400).json({message: "failed", data: "GoTyme pay out minimum value is ₱500."})
     }
+    // Check maintenance flag (keep existing behavior)
     const maintenances = await Maintenance.findOne({type: "payout"})
     .then(data => data)
 
-    if (maintenances.value == "1"){
-        return res.status(400).json({message: "failed", data: "Cashout is available only on Thursdays."})
+    if (maintenances && maintenances.value == "1"){
+        return res.status(400).json({message: "failed", data: "Cashout is temporarily disabled by maintenance."})
+    }
+
+    // Enforce payout days using Philippine time: only 10th, 20th, 30th of the month allowed
+    const today = moment.tz('Asia/Manila').date() // returns day of month (1-31) in Manila timezone
+    const allowedDays = [10, 20, 30]
+    if (!allowedDays.includes(today)) {
+        return res.status(400).json({ message: "failed", data: "Cashout is only available on the 10th, 20th and 30th of the month." })
     }
 
     const exist = await Payout.find({owner: new mongoose.Types.ObjectId(id), type: type, status: "processing"})
