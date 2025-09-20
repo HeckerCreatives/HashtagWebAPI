@@ -34,7 +34,9 @@ exports.requestpayout = async (req, res) => {
     const maintenances = await Maintenance.findOne({type: "payout"})
     .then(data => data)
 
-    if (maintenances && maintenances.value == "1"){
+    console.log(maintenances)
+
+    if (maintenances && maintenances.value == '0'){
         return res.status(400).json({message: "failed", data: "Cashout is temporarily disabled by maintenance."})
     }
 
